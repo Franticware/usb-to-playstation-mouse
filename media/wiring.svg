@@ -28,9 +28,9 @@
      inkscape:document-units="mm"
      showgrid="false"
      showguides="true"
-     inkscape:zoom="1.6819304"
-     inkscape:cx="368.0295"
-     inkscape:cy="296.08835"
+     inkscape:zoom="0.5"
+     inkscape:cx="369"
+     inkscape:cy="340"
      inkscape:window-width="2560"
      inkscape:window-height="1379"
      inkscape:window-x="0"
@@ -152,7 +152,13 @@
        lpeversion="1" /></defs><g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1"><image
+     id="layer1"><rect
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.104381;stroke-linecap:round"
+       id="rect347"
+       width="156.20312"
+       height="85.239929"
+       x="47.296543"
+       y="34.709362" /><image
        width="22.383801"
        height="55.56263"
        preserveAspectRatio="none"
