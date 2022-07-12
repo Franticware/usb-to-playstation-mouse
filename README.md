@@ -20,9 +20,17 @@ Make sure the two PCBs are well isolated from each other.
 
 Uploading the firmware is done in the usual manner, i.e. the Pi is connected via a Micro-USB cable while BOOTSEL button is pressed. The Pi appears as USB flash drive and usb_to_ps1_mouse.uf2 is copied to it. USB mouse must not be connected to the adapter while programming (obviously).
 
-# Notes
-* This is an early version of the adapter, so issues may appear.
-* Not every USB mouse is compatible with the adapter at the moment, but most ordinary ones should work.
+## Notes
+* This is an early version of the adapter, so issues may appear. It is recommended to watch this project so that you catch all upcoming updates and fixes.
 * When connecting the adapter to a PS1 that is already on, USB mouse must be connected to the adapter first and 
 then the adapter should be connected to PS1.
-* To test the adapter, no special game is needed, because the mouse works in the PlayStation system menu that appears when there is no game in the CD drive (at least on my PS1, that is). For this test, PS1 controller should be disconnected.
+* To test the adapter, no special game is needed, because the mouse works in the PlayStation system menu that appears when there is no game in the CD drive). Also, it can be tested with an ordinary audio CD (see youtube link below). For this test, PS1 controller should be disconnected.
+* Known issues:
+  * Not every USB mouse is compatible with the adapter at the moment, but most ordinary ones should work.
+  * When a memory card is present in slot 1 and mouse adapter in port 1, the memory card might not work correctly. The same applies to slot 2 + port 2. This is not a problem e.g. in Quake II, because the mouse is expected to be connected to port 2 and memory card to be in slot 1.
+
+## Links
+
+https://youtu.be/NdH5DYy-4_E
+
+https://hackaday.com/2022/07/12/pi-pico-provides-practical-playstation-pointing/
