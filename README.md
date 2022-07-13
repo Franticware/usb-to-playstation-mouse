@@ -27,7 +27,6 @@ then the adapter should be connected to PS1.
 * To test the adapter, no special game is needed, because the mouse works in the PlayStation system menu that appears when there is no game in the CD drive. Also, it can be tested with an ordinary audio CD (see youtube link below). For this test, PS1 controller should be disconnected.
 * Known issues:
   * Not every USB mouse is compatible with the adapter at the moment, but most ordinary ones should work.
-  * When a memory card is present in slot 1 and mouse adapter in port 1, the memory card might not work correctly. The same applies to slot 2 + port 2. This is not a problem e.g. in Quake II, because the mouse is expected to be connected to port 2 and memory card to be in slot 1.
 
 ## Links
 

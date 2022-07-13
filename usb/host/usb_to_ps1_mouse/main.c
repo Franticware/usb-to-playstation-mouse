@@ -193,19 +193,18 @@ void core1_entry() {
 
     while (1)
     {
+      gpio_set_dir(GP_DAT, GPIO_IN);
+      gpio_pull_up(GP_DAT);
+      
       while (!gpio_get(GP_ATT)) // wait for 1
       {
         tight_loop_contents();
       }      
-      gpio_set_dir(GP_DAT, GPIO_IN);
-      gpio_pull_up(GP_DAT);
       
       while (gpio_get(GP_ATT)) // wait for 0
       {
         tight_loop_contents();
       }
-
-      gpio_set_dir(GP_DAT, GPIO_OUT);
 
       {
         if (!buttonsPending)
@@ -255,6 +254,7 @@ void core1_entry() {
       }
       postAck();
       
+      gpio_set_dir(GP_DAT, GPIO_OUT);      
 
       if (readCmdWriteData(0x12) != 0x42)
       {
