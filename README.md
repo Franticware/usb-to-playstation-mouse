@@ -2,7 +2,7 @@
 
 ![PlayStation with USB mouse connected](media/ps1-with-mouse.jpg)
 
-To build the adapter, the following components are necesary:
+To build the adapter, the following components are necessary:
 * PlayStation controller cable with connector
 * Raspberry Pi Pico
 * Mini PFM Control DC-DC USB 0.9V-5V to 5V dc Boost Step up Power Module
