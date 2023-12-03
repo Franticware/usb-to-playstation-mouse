@@ -28,7 +28,7 @@ static struct
 }hid_info[CFG_TUH_HID];
 
 static void process_kbd_report(hid_keyboard_report_t const *report);
-static void process_mouse_report(hid_mouse_report_t const * report);
+static void process_mouse_report(uint8_t const* report, uint16_t len);
 static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len);
 
 void hid_app_task(void)
@@ -81,17 +81,28 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
 void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len)
 {
   uint8_t const itf_protocol = tuh_hid_interface_protocol(dev_addr, instance);
+  uint8_t const rpt_count = tuh_hid_instance_count(dev_addr);
+
+  uint8_t const* reportAdj = report;
+  uint16_t lenAdj = len;
+
+  if ( rpt_count != 1 )
+  {
+    // Composite report, 1st byte is report ID, data starts from 2nd byte
+    reportAdj++;
+    lenAdj--;
+  }
 
   switch (itf_protocol)
   {
     case HID_ITF_PROTOCOL_KEYBOARD:
       TU_LOG2("HID receive boot keyboard report\r\n");
-      process_kbd_report( (hid_keyboard_report_t const*) report );
+      process_kbd_report( (hid_keyboard_report_t const*) reportAdj );
     break;
 
     case HID_ITF_PROTOCOL_MOUSE:
       TU_LOG2("HID receive boot mouse report\r\n");
-      process_mouse_report( (hid_mouse_report_t const*) report );
+      process_mouse_report(reportAdj, lenAdj);
     break;
 
     default:
@@ -155,9 +166,14 @@ static void process_kbd_report(hid_keyboard_report_t const *report)
 // Mouse
 //--------------------------------------------------------------------+
 
-static void process_mouse_report(hid_mouse_report_t const * report)
+static void process_mouse_report(uint8_t const* report, uint16_t len)
 {
-  int8_t arr[4] = {report->buttons, report->x, report->y, report->wheel};
+  int8_t arr[4] = {0};
+  for (uint16_t i = 0; i != len; ++i)
+  {
+    arr[i] = report[i];
+  }
+  //printf("%d %d %d %d\r\n", (int)report[0], (int)report[1], (int)report[2], (int)report[3]); fflush(stdout);
   uint32_t mouseData = 0;
   memcpy(&mouseData, arr, 4);
   multicore_fifo_push_blocking(mouseData);
@@ -223,7 +239,7 @@ static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t c
       case HID_USAGE_DESKTOP_MOUSE:
         TU_LOG1("HID receive mouse report\r\n");
         // Assume mouse follow boot report layout
-        process_mouse_report( (hid_mouse_report_t const*) report );
+        process_mouse_report(report, len);
       break;
 
       default: break;

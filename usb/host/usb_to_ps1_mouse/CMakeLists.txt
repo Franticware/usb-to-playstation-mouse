@@ -17,3 +17,9 @@ target_include_directories(usb_to_ps1_mouse PUBLIC
 target_link_libraries(usb_to_ps1_mouse PUBLIC pico_stdlib tinyusb_host tinyusb_board pico_multicore)
 
 pico_add_extra_outputs(usb_to_ps1_mouse)
+
+pico_enable_stdio_usb(usb_to_ps1_mouse 0)
+pico_enable_stdio_uart(usb_to_ps1_mouse 1)
+
+# add url via pico_set_program_url
+example_auto_set_url(usb_to_ps1_mouse)

@@ -1,5 +1,5 @@
 if (TARGET tinyusb_host)
     add_subdirectory(host)
 else ()
-    message("Cannot build, TinyUSB unavailable")
+    message("Skipping TinyUSB host examples as TinyUSB is unavailable")
 endif ()
