@@ -39,3 +39,7 @@ https://www.high-voltage.cz/sortky/potrebujete-playstation-mouse-zbastlete-si-ji
 ## Show off
 
 Share your build here: https://github.com/Franticware/usb-to-playstation-mouse/discussions/1
+
+## Special thanks to
+
+[@deefha](https://github.com/deefha) for lending me his original SCPH-1090 PlayStation Mouse

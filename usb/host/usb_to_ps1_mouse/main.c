@@ -146,9 +146,8 @@ void postAck(void)
   sleep_us(8);  
   gpio_set_dir(GP_ACK, GPIO_OUT);
   gpio_set(GP_ACK, 0);
-  sleep_us(2);
+  sleep_us(3);
   gpio_set(GP_ACK, 1);
-  sleep_us(2);
   gpio_set_dir(GP_ACK, GPIO_IN);
   gpio_pull_up(GP_ACK);
 }
@@ -219,8 +218,7 @@ void core1_entry() {
             rightState = QueueGet(rightStateQ);
           }
 
-          buttons1 = 0;
-
+          buttons1 = 3;
           
           if (leftState)
           {
