@@ -88,7 +88,7 @@ GP15 ACK
 
 #define NO_ATT 0x100
 
-#define gpio_set(a, b) do { if (b) gpio_set_mask((1<<a)); else gpio_clr_mask((1<<a)); } while (0)
+//#define gpio_set(a, b) do { if (b) gpio_set_mask((1<<a)); else gpio_clr_mask((1<<a)); } while (0)
 
 uint16_t readCmdWriteData(uint8_t data)
 {
@@ -102,7 +102,7 @@ uint16_t readCmdWriteData(uint8_t data)
         return NO_ATT;
       }
     }
-    gpio_set(GP_DAT, !!(data & (1 << i)));
+    gpio_set_dir(GP_DAT, (data & (1 << i)) ? GPIO_IN : GPIO_OUT);
     while (!gpio_get(GP_CLK)) // wait for 1
     {
       if (gpio_get(GP_ATT))
@@ -145,9 +145,7 @@ void postAck(void)
 {
   sleep_us(8);  
   gpio_set_dir(GP_ACK, GPIO_OUT);
-  gpio_set(GP_ACK, 0);
   sleep_us(3);
-  gpio_set(GP_ACK, 1);
   gpio_set_dir(GP_ACK, GPIO_IN);
   gpio_pull_up(GP_ACK);
 }
@@ -169,32 +167,26 @@ void core1_entry() {
 
     gpio_init(GP_ATT);
     gpio_set_dir(GP_ATT, GPIO_IN);
-    gpio_pull_up(GP_ATT);
 
     gpio_init(GP_CLK);
     gpio_set_dir(GP_CLK, GPIO_IN);
-    gpio_pull_up(GP_CLK);
 
     gpio_init(GP_DAT);
     gpio_set_dir(GP_DAT, GPIO_IN);
-    gpio_pull_up(GP_DAT);
+    gpio_clr_mask((1<<GP_DAT));
 
     gpio_init(GP_CMD);
     gpio_set_dir(GP_CMD, GPIO_IN);
-    gpio_pull_up(GP_CMD);
 
     gpio_init(GP_ACK);
     gpio_set_dir(GP_ACK, GPIO_IN);
-    gpio_pull_up(GP_ACK);
+    gpio_clr_mask((1<<GP_ACK));
 
     uint8_t buttons1 = 0;
     bool buttonsPending = false;
 
     while (1)
     {
-      gpio_set_dir(GP_DAT, GPIO_IN);
-      gpio_pull_up(GP_DAT);
-      
       while (!gpio_get(GP_ATT)) // wait for 1
       {
         tight_loop_contents();
@@ -251,8 +243,6 @@ void core1_entry() {
         continue;
       }
       postAck();
-      
-      gpio_set_dir(GP_DAT, GPIO_OUT);      
 
       if (readCmdWriteData(0x12) != 0x42)
       {
