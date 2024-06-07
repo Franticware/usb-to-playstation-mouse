@@ -166,6 +166,8 @@ static void process_kbd_report(hid_keyboard_report_t const *report)
 // Mouse
 //--------------------------------------------------------------------+
 
+void mouse_cb(const int8_t o[4]);
+
 static void process_mouse_report(uint8_t const* report, uint16_t len)
 {
   int8_t arr[4] = {0};
@@ -173,10 +175,13 @@ static void process_mouse_report(uint8_t const* report, uint16_t len)
   {
     arr[i] = report[i];
   }
+
+  mouse_cb(arr);
+
   //printf("%d %d %d %d\r\n", (int)report[0], (int)report[1], (int)report[2], (int)report[3]); fflush(stdout);
-  uint32_t mouseData = 0;
-  memcpy(&mouseData, arr, 4);
-  multicore_fifo_push_blocking(mouseData);
+  //uint32_t mouseData = 0;
+  //memcpy(&mouseData, arr, 4);
+  //multicore_fifo_push_blocking(mouseData);
 }
 
 //--------------------------------------------------------------------+
