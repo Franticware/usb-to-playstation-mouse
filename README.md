@@ -1,3 +1,6 @@
+### ⚠️ Notice: This repo is deprecated in favor of https://github.com/Franticware/usb-to-ps1-mouse-pro
+### Please note that firmwares between the two are *not* interchangeable.
+
 # USB to PlayStation Mouse
 
 ![PlayStation with USB mouse connected](media/ps1-with-mouse.jpg)
