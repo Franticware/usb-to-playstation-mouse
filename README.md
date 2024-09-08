@@ -29,7 +29,7 @@ Uploading the firmware is done in the usual manner, i.e. the Pi is connected to 
 then the adapter should be connected to PS1.
 * To test the adapter, no special game is needed, because the mouse works in the PlayStation system menu that appears when there is no game in the CD drive (except some early Japanese models). Also, it can be tested with an ordinary audio CD (see [YouTube video](https://youtu.be/NdH5DYy-4_E)). For these tests, PS1 controller should be disconnected.
 * Known issues:
-  * Not every USB mouse is compatible with the adapter at the moment, but most should work.
+  * Not every USB mouse is compatible with the adapter.
 
 ## Links
 

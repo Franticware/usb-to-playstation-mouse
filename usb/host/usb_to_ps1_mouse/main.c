@@ -11,14 +11,8 @@ auto_init_mutex(mtx);
 
 static int8_t gSumX = 0;
 static int8_t gSumY = 0;
-
-static int8_t gL = 0;
-static int8_t gLUp = 1;
-static int8_t gLDown = 0;
-
-static int8_t gR = 0;
-static int8_t gRUp = 1;
-static int8_t gRDown = 0;
+static bool gL = 0;
+static bool gR = 0;
 
 // sum with saturation
 int8_t sumSat(int8_t a, int8_t b) {
@@ -35,20 +29,8 @@ void mouse_cb(const int8_t o[4])
   mutex_enter_blocking(&mtx);
   gSumX = sumSat(gSumX, o[1]);
   gSumY = sumSat(gSumY, o[2]);
-
   gL = o[0] & 1;
-  if (gL) {
-    gLDown = 1;
-  } else {
-    gLUp = 1;
-  }
-
   gR = o[0] & 2;
-  if (gR) {
-    gRDown = 1;
-  } else {
-    gRUp = 1;
-  }
   mutex_exit(&mtx);
 }
 
@@ -58,7 +40,7 @@ void core1_main() {
   tusb_init();
 
   while (true) {
-      tuh_task();
+    tuh_task();
   }
 }
 
@@ -68,14 +50,26 @@ void core1_main() {
 #define GP_CMD 14
 #define GP_ACK 15
 
+#define GP_LED 25
+
 #define NO_ATT 0x100
 
-uint8_t noAtt() {
+static inline uint8_t noAtt(void) {
   if (gpio_get(GP_ATT)) {
     return 1;
   } else {
     return 0;
   }
+}
+
+static inline void setBus(uint gpio) {
+  gpio_set_dir(gpio, GPIO_IN);
+  gpio_set_mask(1 << gpio);
+}
+
+static inline void clrBus(uint gpio) {
+  gpio_clr_mask(1 << gpio);
+  gpio_set_dir(gpio, GPIO_OUT);
 }
 
 uint16_t readCmdWriteData(uint8_t data) {
@@ -86,15 +80,14 @@ uint16_t readCmdWriteData(uint8_t data) {
       tight_loop_contents();
     }
     if (noAtt()) {
-      gpio_set_dir(GP_DAT, GPIO_IN);
+      setBus(GP_DAT);
       return NO_ATT;
     }
 
     if (data & (1 << i)) {
-      gpio_set_dir(GP_DAT, GPIO_IN);
+      setBus(GP_DAT);
     } else {
-      gpio_set_dir(GP_DAT, GPIO_OUT);
-      gpio_clr_mask((1 << GP_DAT));
+      clrBus(GP_DAT);
     }
 
     while (!gpio_get(GP_CLK)) // wait for 1
@@ -102,13 +95,13 @@ uint16_t readCmdWriteData(uint8_t data) {
       tight_loop_contents();
     }
     if (noAtt()) {
-      gpio_set_dir(GP_DAT, GPIO_IN);
+      setBus(GP_DAT);
       return NO_ATT;
     }
     ret |= gpio_get(GP_CMD) << i;
   }
   sleep_us(2);
-  gpio_set_dir(GP_DAT, GPIO_IN);
+  setBus(GP_DAT);
   return ret;
 }
 
@@ -139,13 +132,12 @@ uint16_t readCmd(void) {
 
 void postAck(void) {
   sleep_us(11);
-  gpio_set_dir(GP_ACK, GPIO_OUT);
-  gpio_clr_mask((1 << GP_ACK));
+  clrBus(GP_ACK);
   sleep_us(3);
-  gpio_set_dir(GP_ACK, GPIO_IN);
+  setBus(GP_ACK);
 }
 
-void core0_main() {
+void core0_main(void) {
   gpio_init(GP_ATT);
   gpio_set_dir(GP_ATT, GPIO_IN);
 
@@ -153,78 +145,48 @@ void core0_main() {
   gpio_set_dir(GP_CLK, GPIO_IN);
 
   gpio_init(GP_DAT);
+  gpio_set_slew_rate(GP_DAT, GPIO_SLEW_RATE_SLOW);
   gpio_set_dir(GP_DAT, GPIO_IN);
-  gpio_clr_mask((1 << GP_DAT));
+  gpio_clr_mask(1 << GP_DAT);
 
   gpio_init(GP_CMD);
   gpio_set_dir(GP_CMD, GPIO_IN);
 
   gpio_init(GP_ACK);
+  gpio_set_slew_rate(GP_ACK, GPIO_SLEW_RATE_SLOW);
   gpio_set_dir(GP_ACK, GPIO_IN);
-  gpio_clr_mask((1 << GP_ACK));
+  gpio_clr_mask(1 << GP_ACK);
 
-  int8_t sumX = 0;
-  int8_t sumY = 0;
+  gpio_init(GP_LED);
+  gpio_set_slew_rate(GP_LED, GPIO_SLEW_RATE_SLOW);
+  gpio_clr_mask(1 << GP_LED);
+  gpio_set_dir(GP_LED, GPIO_OUT);
 
-  int8_t buttonL = 0;
-  int8_t prevL = 0;
-  int8_t LUp = 0;
-  int8_t LDown = 0;
+  bool updateLED = false;
+  bool buttonL = false;
+  bool buttonR = false;
 
-  int8_t buttonR = 0;
-  int8_t prevR = 0;
-  int8_t RUp = 0;
-  int8_t RDown = 0;
-
-  while (1) {
-    while (!gpio_get(GP_ATT)) // wait for 1
-    {
-      tight_loop_contents();
-    }
-    while (gpio_get(GP_ATT)) // wait for 0
+  for (;;) {
+    while (!noAtt()) // wait to finish current attention cycle
     {
       tight_loop_contents();
     }
 
-    mutex_enter_blocking(&mtx);
-    sumX = sumSat(sumX, gSumX);
-    gSumX = 0;
-    sumY = sumSat(sumY, gSumY);
-    gSumY = 0;
-
-    LDown = LDown || gLDown;
-    LUp = LUp || gLUp;
-    gLDown = gL;
-    gLUp = !gL;
-
-    RDown = RDown || gRDown;
-    RUp = RUp || gRUp;
-    gRDown = gR;
-    gRUp = !gR;
-    mutex_exit(&mtx);
-
-    if (LUp && LDown) {
-      buttonL = !prevL;
-    } else if (LDown) {
-      buttonL = 1;
-    } else {
-      buttonL = 0;
+    if (updateLED) {
+      if (buttonL)
+      {
+        gpio_set_mask(1 << GP_LED);
+      }
+      else
+      {
+        gpio_clr_mask(1 << GP_LED);
+      }
+      updateLED = false;
     }
 
-    if (RUp && RDown) {
-      buttonR = !prevR;
-    } else if (RDown) {
-      buttonR = 1;
-    } else {
-      buttonR = 0;
-    }
-
-    uint8_t buttons1 = 3;
-    if (buttonL) {
-      buttons1 |= 8;
-    }
-    if (buttonR) {
-      buttons1 |= 4;
+    while (noAtt()) // wait for new attention signal
+    {
+      tight_loop_contents();
     }
 
     if (readCmd() != 0x01) {
@@ -247,6 +209,23 @@ void core0_main() {
     }
     postAck();
 
+    mutex_enter_blocking(&mtx);
+    int8_t sumX = gSumX;
+    gSumX = 0;
+    int8_t sumY = gSumY;
+    gSumY = 0;
+    buttonL = gL;
+    buttonR = gR;
+    mutex_exit(&mtx);
+
+    uint8_t buttons1 = 3;
+    if (buttonL) {
+      buttons1 |= 8;
+    }
+    if (buttonR) {
+      buttons1 |= 4;
+    }
+
     if (readCmdWriteData(~buttons1) == NO_ATT) // buttons
     {
       continue;
@@ -264,17 +243,7 @@ void core0_main() {
       continue;
     }
     // no ack here!
-
-    {
-      sumX = 0;
-      sumY = 0;
-      prevL = buttonL;
-      prevR = buttonR;
-      LUp = 0;
-      LDown = 0;
-      RUp = 0;
-      RDown = 0;
-    }
+    updateLED = true;
   }
 }
 
