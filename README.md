@@ -39,6 +39,10 @@ https://hackaday.com/2022/07/12/pi-pico-provides-practical-playstation-pointing/
 
 https://www.high-voltage.cz/sortky/potrebujete-playstation-mouse-zbastlete-si-ji/
 
+## Support this project
+
+To express your support of this project, you can use your favorite service to listen to a [music track I produced](https://share.amuse.io/track/vojtech-salajka-color-graphics-pinball-original-game-soundtrack). It is not much, but it is the only digital product I am offering commercially as of writing this. Thank you!
+
 ## Show off
 
 Share your build here: https://github.com/Franticware/usb-to-playstation-mouse/discussions/1
